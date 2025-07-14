@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The Sinclair Family Tree</title>
+  <title>The Pinto Family Tree</title>
   <link rel="icon" href="assets/favicon.png" type="image/png" />
   <style>
     body {
@@ -214,7 +214,7 @@
 
   <header>
     <img src="assets/photos/tree-icon.png" alt="Tree Icon" />
-    <h1>The Sinclair Family Tree</h1>
+    <h1>The Pinto Family Tree</h1>
   </header>
 
   <nav>
@@ -243,7 +243,7 @@
   </nav>
 
   <section class="welcome-section">
-    <h2>Welcome to the Sinclair Family Tree</h2>
+    <h2>Welcome to the Pinto Family Tree</h2>
     <p>Explore your family history, bios, and timeline. Use the search box below to find family members quickly.</p>
   </section>
 
@@ -270,7 +270,7 @@
   <div id="tree" class="tree-container" aria-label="Family tree"></div>
 
   <footer>
-    &copy; <span id="year"></span> The Sinclair Family Tree Project
+    &copy; <span id="year"></span> The Pinto Family Tree Project
   </footer>
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
