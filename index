@@ -1,1 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Sinclair Family Tree</title>
+  <link rel="icon" href="assets/favicon.png" type="image/png" />
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header, nav {
+      width: 100%;
+    }
+    header {
+      background-color: #2e7d32;
+      color: white;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+    header img {
+      height: 40px;
+      width: 40px;
+    }
+    nav {
+      background: #1b5e20;
+      padding: 10px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    nav a, nav .dropdown-btn {
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      position: relative;
+      user-select: none;
+      cursor: pointer;
+    }
+    nav a:hover, nav .dropdown-btn:hover {
+      text-decoration: underline;
+    }
+    /* Dropdown container */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    /* Dropdown button */
+    .dropdown-btn {
+      padding: 0 8px;
+      border: none;
+      background: none;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+      user-select: none;
+    }
+    /* Dropdown content */
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 36px;
+      left: 0;
+      background-color: #ffffff;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+      z-index: 1000;
+      min-width: 160px;
+      border-radius: 4px;
+    }
+    .dropdown-content a {
+      display: block;
+      padding: 10px;
+      color: #2e7d32;
+      white-space: nowrap;
+    }
+    .dropdown-content a:hover {
+      background-color: #c8e6c9;
+      text-decoration: none;
+    }
+    /* Show dropdown on hover for desktop */
+    @media (hover: hover) {
+      .dropdown:hover .dropdown-content {
+        display: block;
+      }
+    }
+    /* Show dropdown on focus for accessibility */
+    .dropdown:focus-within .dropdown-content {
+      display: block;
+    }
+    /* Mobile-friendly: toggle dropdown on button click */
+    /* We'll use JS for this */
 
+    .welcome-section {
+      max-width: 1000px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .search-box {
+      max-width: 320px;
+      margin: 20px auto 0;
+      text-align: left;
+      position: relative;
+    }
+    .search-box label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+    .search-box input {
+      padding: 8px;
+      width: 100%;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding-right: 12px;
+      box-sizing: border-box;
+    }
+    .search-results {
+      max-width: 320px;
+      margin: 5px auto 20px;
+      color: #0096FF;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+    }
+    .timeline-container {
+      max-width: 1000px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      font-size: 1.1rem;
+      line-height: 1.4;
+    }
+    .timeline-container h2 {
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    .timeline-item {
+      margin-bottom: 12px;
+      padding-left: 10px;
+      border-left: 4px solid #66bb6a;
+    }
+    .tree-container {
+      flex: 1;
+      width: 100%;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .zoom-controls {
+      display: flex;
+      gap: 10px;
+      margin: 10px auto;
+      justify-content: center;
+    }
+    .zoom-controls button {
+      background: #2e7d32;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      user-select: none;
+    }
+    svg {
+      display: block;
+      margin: 0 auto;
+    }
+    .node image {
+      clip-path: circle(20px at center);
+    }
+    .node text {
+      font-size: 12px;
+      fill: #2e7d32;
+      transition: all 0.3s ease;
+    }
+    .link {
+      fill: none;
+      stroke: #999;
+      stroke-width: 2px;
+    }
+    footer {
+      background: #e0e0e0;
+      text-align: center;
+      padding: 15px;
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="assets/photos/tree-icon.png" alt="Tree Icon" />
+    <h1>The Sinclair Family Tree</h1>
+  </header>
+
+  <nav>
+    <a href="index.html" aria-label="Home page">Home</a>
+    <a href="discussion.html" target="_blank" aria-label="Discussion page">Discussion</a>
+
+    <div class="dropdown" tabindex="0" aria-haspopup="true" aria-expanded="false">
+      <button class="dropdown-btn" aria-controls="bios-menu" aria-haspopup="true" aria-expanded="false">
+        Bios ▼
+      </button>
+      <div class="dropdown-content" id="bios-menu" role="menu" aria-label="Family Bios">
+        <a href="bios/grandparent-a.html" target="_blank" role="menuitem">Grandparent A</a>
+        <a href="bios/grandparent-b.html" target="_blank" role="menuitem">Grandparent B</a>
+        <a href="bios/parent-a.html" target="_blank" role="menuitem">Parent A</a>
+        <a href="bios/parent-b.html" target="_blank" role="menuitem">Parent B</a>
+        <a href="bios/sibling1.html" target="_blank" role="menuitem">Sibling 1</a>
+        <a href="bios/sibling2.html" target="_blank" role="menuitem">Sibling 2</a>
+        <a href="bios/spouse2.html" target="_blank" role="menuitem">Spouse 2</a>
+        <a href="bios/child2.html" target="_blank" role="menuitem">Child 2</a>
+        <a href="bios/sibling3.html" target="_blank" role="menuitem">Sibling 3</a>
+        <a href="bios/spouse3.html" target="_blank" role="menuitem">Spouse 3</a>
+        <a href="bios/child3.html" target="_blank" role="menuitem">Child 3</a>
+        <a href="bios/you.html" target="_blank" role="menuitem">You</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="welcome-section">
+    <h2>Welcome to the Sinclair Family Tree</h2>
+    <p>Explore your family history, bios, and timeline. Use the search box below to find family members quickly.</p>
+  </section>
+
+  <section class="search-box" aria-label="Search family members">
+    <label for="searchInput">Search Family Members:</label>
+    <input type="text" id="searchInput" placeholder="Enter name..." autocomplete="off" />
+    <div id="searchResults" class="search-results" aria-live="polite" aria-atomic="true"></div>
+  </section>
+
+  <section class="timeline-container" aria-label="Timeline of Key Events">
+    <h2>🕰️ Timeline of Key Events</h2>
+    <div class="timeline-item">1932 – Alice Sinclair is born in Perth</div>
+    <div class="timeline-item">1953 – Alice marries Edward Sinclair</div>
+    <div class="timeline-item">1985 – First family reunion held in Melbourne</div>
+    <div class="timeline-item">2011 – Alice passes away</div>
+  </section>
+
+  <div class="zoom-controls">
+    <button id="zoomInBtn" aria-label="Zoom In">+</button>
+    <button id="zoomOutBtn" aria-label="Zoom Out">–</button>
+    <button id="resetZoomBtn" aria-label="Reset Zoom">Reset</button>
+  </div>
+
+  <div id="tree" class="tree-container" aria-label="Family tree"></div>
+
+  <footer>
+    &copy; <span id="year"></span> The Sinclair Family Tree Project
+  </footer>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+    // Set current year
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Dropdown toggle for mobile
+    const dropdownBtn = document.querySelector('.dropdown-btn');
+    const dropdownContent = document.querySelector('.dropdown-content');
+    const dropdown = document.querySelector('.dropdown');
+
+    dropdownBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const expanded = dropdownBtn.getAttribute('aria-expanded') === 'true';
+      dropdownBtn.setAttribute('aria-expanded', !expanded);
+      dropdownContent.style.display = expanded ? 'none' : 'block';
+      dropdown.setAttribute('aria-expanded', !expanded);
+    });
+    // Close dropdown when clicking outside
+    document.body.addEventListener('click', () => {
+      dropdownContent.style.display = 'none';
+      dropdownBtn.setAttribute('aria-expanded', false);
+      dropdown.setAttribute('aria-expanded', false);
+    });
+
+    // Family tree data structure
+    const treeData = {
+      "name": "Grandparents",
+      "children": [
+        {
+          "name": "Grandparent A",
+          "photo": "grandparent-a.jpg",
+          "bio": "bios/grandparent-a.html",
+          "children": [
+            {
+              "name": "Parent A",
+              "photo": "parent-a.jpg",
+              "bio": "bios/parent-a.html",
+              "children": [
+                {
+                  "name": "You",
+                  "photo": "you.jpg",
+                  "bio": "bios/you.html"
+                },
+                {
+                  "name": "Sibling 1",
+                  "photo": "sibling1.jpg",
+                  "bio": "bios/sibling1.html"
+                },
+                {
+                  "name": "Sibling 2",
+                  "photo": "sibling2.jpg",
+                  "bio": "bios/sibling2.html",
+                  "children": [
+                    {
+                      "name": "Spouse 2",
+                      "photo": "spouse2.jpg",
+                      "bio": "bios/spouse2.html"
+                    },
+                    {
+                      "name": "Child 2",
+                      "photo": "child2.jpg",
+                      "bio": "bios/child2.html"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Grandparent B",
+          "photo": "grandparent-b.jpg",
+          "bio": "bios/grandparent-b.html",
+          "children": [
+            {
+              "name": "Parent B",
+              "photo": "parent-b.jpg",
+              "bio": "bios/parent-b.html",
+              "children": [
+                {
+                  "name": "Sibling 3",
+                  "photo": "sibling3.jpg",
+                  "bio": "bios/sibling3.html",
+                  "children": [
+                    {
+                      "name": "Spouse 3",
+                      "photo": "spouse3.jpg",
+                      "bio": "bios/spouse3.html"
+                    },
+                    {
+                      "name": "Child 3",
+                      "photo": "child3.jpg",
+                      "bio": "bios/child3.html"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
+    // Setup D3 tree layout
+    const margin = { top: 100, right: 90, bottom: 30, left: 90 },
+      width = 1200 - margin.left - margin.right,
+      height = 700 - margin.top - margin.bottom;
+
+    const svg = d3.select("#tree")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom);
+
+    const g = svg.append("g")
+      .attr("transform", `translate(${width / 2},${margin.top})`);
+
+    const root = d3.hierarchy(treeData);
+    const treeLayout = d3.tree().size([width, height]);
+    treeLayout(root);
+
+    // Create links
+    const link = g.selectAll(".link")
+      .data(root.links())
+      .join("path")
+      .attr("class", "link")
+      .attr("d", d3.linkVertical()
+        .x(d => d.x)
+        .y(d => d.y));
+
+    // Create nodes
+    const node = g.selectAll(".node")
+      .data(root.descendants())
+      .join("g")
+      .attr("class", "node")
+      .attr("transform", d => `translate(${d.x},${d.y})`)
+      .style("cursor", "pointer")
+      .on("click", d => {
+        if (d.data.bio) window.open(d.data.bio, "_blank");
+      });
+
+    node.append("image")
+      .attr("xlink:href", d => d.data.photo ? "assets/photos/" + d.data.photo : "assets/photos/placeholder.jpg")
+      .attr("x", -20)
+      .attr("y", -20)
+      .attr("width", 40)
+      .attr("height", 40)
+      .attr("alt", d => d.data.name)
+      .on("error", function () {
+        d3.select(this).attr("xlink:href", "assets/photos/placeholder.jpg");
+      });
+
+    node.append("text")
+      .attr("dy", 35)
+      .attr("text-anchor", "middle")
+      .text(d => d.data.name);
+
+    // Setup zoom behavior
+    const zoom = d3.zoom()
+      .scaleExtent([0.5, 2])
+      .on("zoom", (event) => {
+        g.attr("transform", event.transform);
+      });
+    svg.call(zoom).call(zoom.transform, d3.zoomIdentity.translate(width / 2, margin.top));
+
+    // Zoom buttons
+    document.getElementById("zoomInBtn").addEventListener("click", () => {
+      svg.transition().call(zoom.scaleBy, 1.2);
+    });
+    document.getElementById("zoomOutBtn").addEventListener("click", () => {
+      svg.transition().call(zoom.scaleBy, 0.8);
+    });
+    document.getElementById("resetZoomBtn").addEventListener("click", () => {
+      svg.transition().call(zoom.transform, d3.zoomIdentity.translate(width / 2, margin.top));
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById("searchInput");
+    const searchResults = document.getElementById("searchResults");
+
+    function clearHighlight() {
+      node.selectAll("text").attr("fill", "#2e7d32").attr("font-weight", "normal");
+    }
+
+    function highlightNode(name) {
+      node.filter(d => d.data.name.toLowerCase() === name.toLowerCase())
+        .select("text")
+        .attr("fill", "#0096FF")
+        .attr("font-weight", "bold");
+    }
+
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value.trim().toLowerCase();
+      clearHighlight();
+      searchResults.innerHTML = "";
+      if (!query) return;
+      const matches = root.descendants().filter(d => d.data.name.toLowerCase().includes(query));
+      if (matches.length) {
+        // Build clickable results list
+        matches.forEach(d => {
+          const a = document.createElement("a");
+          a.textContent = d.data.name;
+          a.href = d.data.bio || "#";
+          a.target = "_blank";
+          a.style.display = "block";
+          a.style.color = "#0096FF";
+          a.style.cursor = "pointer";
+          a.style.textDecoration = "underline";
+          a.addEventListener("click", e => e.stopPropagation());
+          searchResults.appendChild(a);
+          highlightNode(d.data.name);
+        });
+      } else {
+        searchResults.textContent = "No matches found";
+      }
+    });
+  </script>
+</body>
+</html>
