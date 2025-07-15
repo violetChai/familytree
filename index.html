@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The Violet Family Tree</title>
-  <link rel="icon" href="assets/favicon.ico" type="image/x-icon" />
+  <title>The Violet Family Tree - Side Panel Bios</title>
   <style>
+    /* Same basic styling as before (omitted here for brevity, keep from previous example) */
     body {
       font-family: sans-serif;
       margin: 0;
@@ -13,6 +13,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      overflow-x: hidden;
     }
     header, nav {
       width: 100%;
@@ -201,6 +202,45 @@
       color: #555;
       margin-top: auto;
     }
+
+    /* Side panel styles */
+    #bioPanel {
+      position: fixed;
+      top: 0;
+      right: -400px;
+      width: 400px;
+      height: 100%;
+      background: white;
+      box-shadow: -4px 0 12px rgba(0,0,0,0.3);
+      overflow-y: auto;
+      transition: right 0.3s ease;
+      z-index: 2000;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    #bioPanel.open {
+      right: 0;
+    }
+    #bioPanelClose {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 24px;
+      font-weight: bold;
+      background: none;
+      border: none;
+      color: #2e7d32;
+      cursor: pointer;
+      user-select: none;
+    }
+    #bioPanelClose:hover {
+      color: #006400;
+    }
+    #bioPanel h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      color: #2e7d32;
+    }
   </style>
 </head>
 <body>
@@ -211,25 +251,25 @@
 
   <nav>
     <a href="index.html" aria-label="Home page">Home</a>
-    <a href="discussion.html" target="_blank" aria-label="Discussion page">Discussion</a>
+    <a href="discussion.html" aria-label="Discussion page">Discussion</a>
 
     <div class="dropdown" tabindex="0" aria-haspopup="true" aria-expanded="false">
       <button class="dropdown-btn" aria-controls="bios-menu" aria-haspopup="true" aria-expanded="false">
         Bios ▼
       </button>
       <div class="dropdown-content" id="bios-menu" role="menu" aria-label="Family Bios">
-        <a href="bios/grandparent-a.html" target="_blank" role="menuitem">Grandparent A</a>
-        <a href="bios/grandparent-b.html" target="_blank" role="menuitem">Grandparent B</a>
-        <a href="bios/parent-a.html" target="_blank" role="menuitem">Parent A</a>
-        <a href="bios/parent-b.html" target="_blank" role="menuitem">Parent B</a>
-        <a href="bios/sibling1.html" target="_blank" role="menuitem">Sibling 1</a>
-        <a href="bios/sibling2.html" target="_blank" role="menuitem">Sibling 2</a>
-        <a href="bios/spouse2.html" target="_blank" role="menuitem">Spouse 2</a>
-        <a href="bios/child2.html" target="_blank" role="menuitem">Child 2</a>
-        <a href="bios/sibling3.html" target="_blank" role="menuitem">Sibling 3</a>
-        <a href="bios/spouse3.html" target="_blank" role="menuitem">Spouse 3</a>
-        <a href="bios/child3.html" target="_blank" role="menuitem">Child 3</a>
-        <a href="bios/you.html" target="_blank" role="menuitem">You</a>
+        <a href="#" data-bio="bios/grandparent-a.html" role="menuitem">Grandparent A</a>
+        <a href="#" data-bio="bios/grandparent-b.html" role="menuitem">Grandparent B</a>
+        <a href="#" data-bio="bios/parent-a.html" role="menuitem">Parent A</a>
+        <a href="#" data-bio="bios/parent-b.html" role="menuitem">Parent B</a>
+        <a href="#" data-bio="bios/sibling1.html" role="menuitem">Sibling 1</a>
+        <a href="#" data-bio="bios/sibling2.html" role="menuitem">Sibling 2</a>
+        <a href="#" data-bio="bios/spouse2.html" role="menuitem">Spouse 2</a>
+        <a href="#" data-bio="bios/child2.html" role="menuitem">Child 2</a>
+        <a href="#" data-bio="bios/sibling3.html" role="menuitem">Sibling 3</a>
+        <a href="#" data-bio="bios/spouse3.html" role="menuitem">Spouse 3</a>
+        <a href="#" data-bio="bios/child3.html" role="menuitem">Child 3</a>
+        <a href="#" data-bio="bios/you.html" role="menuitem">You</a>
       </div>
     </div>
   </nav>
@@ -261,16 +301,23 @@
 
   <div id="tree" class="tree-container" aria-label="Family tree"></div>
 
+  <!-- Side panel for bios -->
+  <aside id="bioPanel" role="region" aria-label="Biography side panel" aria-hidden="true">
+    <button id="bioPanelClose" aria-label="Close biography panel">&times;</button>
+    <h3 id="bioPanelTitle">Loading...</h3>
+    <div id="bioPanelBody" style="margin-top:15px; max-height:80vh; overflow-y:auto;">
+      Loading content...
+    </div>
+  </aside>
+
   <footer>
     &copy; <span id="year"></span> The Violet Family Tree Project
   </footer>
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script>
-    // Set current year
     document.getElementById("year").textContent = new Date().getFullYear();
 
-    // Dropdown toggle for mobile and accessibility
     const dropdownBtn = document.querySelector('.dropdown-btn');
     const dropdownContent = document.querySelector('.dropdown-content');
     const dropdown = document.querySelector('.dropdown');
@@ -289,7 +336,52 @@
       dropdown.setAttribute('aria-expanded', false);
     });
 
-    // Family tree data
+    // Side panel elements
+    const bioPanel = document.getElementById('bioPanel');
+    const bioPanelTitle = document.getElementById('bioPanelTitle');
+    const bioPanelBody = document.getElementById('bioPanelBody');
+    const bioPanelClose = document.getElementById('bioPanelClose');
+
+    function openBioPanel(url, name) {
+      bioPanel.classList.add('open');
+      bioPanel.setAttribute('aria-hidden', 'false');
+      bioPanelTitle.textContent = name;
+      bioPanelBody.innerHTML = 'Loading content...';
+
+      fetch(url)
+        .then(resp => {
+          if (!resp.ok) throw new Error("Failed to load bio.");
+          return resp.text();
+        })
+        .then(html => {
+          bioPanelBody.innerHTML = html;
+        })
+        .catch(err => {
+          bioPanelBody.innerHTML = `<p style="color:red;">${err.message}</p>`;
+        });
+    }
+
+    function closeBioPanel() {
+      bioPanel.classList.remove('open');
+      bioPanel.setAttribute('aria-hidden', 'true');
+      bioPanelBody.innerHTML = '';
+      bioPanelTitle.textContent = 'Loading...';
+    }
+
+    bioPanelClose.addEventListener('click', closeBioPanel);
+
+    // Attach side panel open to dropdown bio links
+    dropdownContent.querySelectorAll('a[data-bio]').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        openBioPanel(link.dataset.bio, link.textContent);
+        dropdownContent.style.display = 'none';
+        dropdownBtn.setAttribute('aria-expanded', false);
+        dropdown.setAttribute('aria-expanded', false);
+      });
+    });
+
+    // Family tree data (same as before)
     const treeData = {
       "name": "Grandparents",
       "children": [
@@ -344,12 +436,10 @@
       ]
     };
 
-    // Set dimensions and margins
     const margin = { top: 100, right: 90, bottom: 30, left: 90 },
           width = 1200 - margin.left - margin.right,
           height = 700 - margin.top - margin.bottom;
 
-    // Create SVG container
     const svg = d3.select("#tree").append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom);
@@ -357,19 +447,16 @@
     const g = svg.append("g")
       .attr("transform", `translate(${width / 2},${margin.top})`);
 
-    // Create tree layout
     const root = d3.hierarchy(treeData);
     const treeLayout = d3.tree().size([width, height]);
     treeLayout(root);
 
-    // Draw links
     g.selectAll(".link")
       .data(root.links())
       .join("path")
       .attr("class", "link")
       .attr("d", d3.linkVertical().x(d => d.x).y(d => d.y));
 
-    // Draw nodes
     const node = g.selectAll(".node")
       .data(root.descendants())
       .join("g")
@@ -378,7 +465,7 @@
       .style("cursor", "pointer")
       .on("click", d => {
         if (d.data.bio) {
-          window.open(d.data.bio, "_blank");
+          openBioPanel(d.data.bio, d.data.name);
         }
       });
 
@@ -395,34 +482,19 @@
       .attr("text-anchor", "middle")
       .text(d => d.data.name);
 
-    // Zoom behavior
-    const zoom = d3.zoom()
-      .scaleExtent([0.5, 2])
-      .on("zoom", event => {
-        g.attr("transform", event.transform);
-      });
-
+    const zoom = d3.zoom().scaleExtent([0.5, 2]).on("zoom", event => g.attr("transform", event.transform));
     svg.call(zoom).call(zoom.transform, d3.zoomIdentity.translate(width / 2, margin.top));
 
-    // Zoom buttons
-    document.getElementById("zoomInBtn").addEventListener("click", () => {
-      svg.transition().call(zoom.scaleBy, 1.2);
-    });
-    document.getElementById("zoomOutBtn").addEventListener("click", () => {
-      svg.transition().call(zoom.scaleBy, 0.8);
-    });
-    document.getElementById("resetZoomBtn").addEventListener("click", () => {
-      svg.transition().call(zoom.transform, d3.zoomIdentity.translate(width / 2, margin.top));
-    });
+    document.getElementById("zoomInBtn").addEventListener("click", () => svg.transition().call(zoom.scaleBy, 1.2));
+    document.getElementById("zoomOutBtn").addEventListener("click", () => svg.transition().call(zoom.scaleBy, 0.8));
+    document.getElementById("resetZoomBtn").addEventListener("click", () => svg.transition().call(zoom.transform, d3.zoomIdentity.translate(width / 2, margin.top)));
 
     // Search functionality
     const searchInput = document.getElementById("searchInput");
     const searchResults = document.getElementById("searchResults");
 
     function clearHighlight() {
-      node.selectAll("text")
-        .attr("fill", "#2e7d32")
-        .attr("font-weight", "normal");
+      node.selectAll("text").attr("fill", "#2e7d32").attr("font-weight", "normal");
     }
 
     function highlightNode(name) {
@@ -437,22 +509,20 @@
       clearHighlight();
       searchResults.innerHTML = "";
       if (!query) return;
-
-      const matches = root.descendants().filter(d =>
-        d.data.name.toLowerCase().includes(query)
-      );
-
+      const matches = root.descendants().filter(d => d.data.name.toLowerCase().includes(query));
       if (matches.length) {
         matches.forEach(d => {
           const a = document.createElement("a");
           a.textContent = d.data.name;
-          a.href = d.data.bio || "#";
-          a.target = "_blank";
+          a.href = "#";
           a.style.display = "block";
           a.style.color = "#0096FF";
           a.style.cursor = "pointer";
           a.style.textDecoration = "underline";
-          a.addEventListener("click", e => e.stopPropagation());
+          a.addEventListener("click", e => {
+            e.preventDefault();
+            openBioPanel(d.data.bio, d.data.name);
+          });
           searchResults.appendChild(a);
           highlightNode(d.data.name);
         });
